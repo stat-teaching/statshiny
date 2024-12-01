@@ -121,41 +121,103 @@ ul.task-list li input[type="checkbox"] {
 
 
 
-<p>Ciao come va</p>
 <pre class="shinylive-r" data-engine="r"><code>#| '!! shinylive warning !!': |
 #|   shinylive does not work in self-contained HTML documents.
 #|   Please set `embed-resources: false` in your metadata.
 #| standalone: true
 #| viewerHeight: 800
 library(shiny)
+
+# Define UI
 ui &lt;- fluidPage(
-  titlePanel("Hello Shiny!"),
-  sidebarLayout(
-    sidebarPanel(
-      sliderInput(
-        inputId = "bins",
-        label = "Number of bins:",
-        min = 1,
-        max = 50,
-        value = 30
-      )
-    ),
-    mainPanel(
-      plotOutput(outputId = "distPlot")
+    titlePanel("Sampling Distribution Simulator"),
+    sidebarLayout(
+        sidebarPanel(
+            sliderInput("n", "Sample Size (n):", 
+                        min = 1, max = 100, value = 30, step = 1),
+            sliderInput("mean", "Mean:", 
+                        min = 0, max = 10, value = 0, step = 0.1),
+            sliderInput("sd", "Standard Deviation:", 
+                        min = 0.1, max = 10, value = 1, step = 0.1),
+            numericInput("B", "Number of Replications (B):", 
+                         1e3, min = 1, max = 1e6),
+            textInput("fun", "Function (e.g., mean, sd):", value = "mean"),
+            checkboxInput("fixAxis", "Fix x-axis limits?", value = FALSE),
+            conditionalPanel(
+                condition = "input.fixAxis == true",
+                numericInput("xMin", "X-axis Minimum:", value = -10, step = 1),
+                numericInput("xMax", "X-axis Maximum:", value = 10, step = 1)
+            ),
+            actionButton("simulate", "Simulate")
+        ),
+        mainPanel(
+            plotOutput("histPlot")
+        )
     )
-  )
 )
+
+# Define server logic
 server &lt;- function(input, output) {
-  output$distPlot &lt;- renderPlot({
-    x &lt;- faithful$waiting
-    bins &lt;- seq(min(x), max(x), length.out = input$bins + 1)
-    hist(x,
-      breaks = bins, col = "#75AADB", border = "white",
-      xlab = "Waiting time to next eruption (in mins)",
-      main = "Histogram of waiting times"
-    )
-  })
+    # Function for generating the sampling distribution
+    sampdist &lt;- function(n, mean = 0, sd = 1, B = 1e3, FUN) {
+        replicate(
+            B,
+            {
+                x &lt;- rnorm(n, mean, sd)
+                FUN(x)
+            }
+        )
+    }
+    
+    # Reactive value to store simulation results
+    simData &lt;- reactiveVal(NULL)
+    
+    # Simulate when the button is clicked
+    observeEvent(input$simulate, {
+        # Parse function from user input
+        FUN &lt;- match.fun(input$fun)
+        
+        # Generate sampling distribution
+        results &lt;- sampdist(
+            n = input$n,
+            mean = input$mean,
+            sd = input$sd,
+            B = input$B,
+            FUN = FUN
+        )
+        
+        # Update reactive value
+        simData(results)
+    })
+    
+    # Render histogram
+    output$histPlot &lt;- renderPlot({
+        results &lt;- simData()
+        
+        # Ensure results are available
+        if (is.null(results)) return()
+        
+        # Determine x-axis limits
+        xlim &lt;- if (input$fixAxis) {
+            c(input$xMin, input$xMax)
+        } else {
+            NULL
+        }
+        
+        # Plot histogram
+        hist(results, 
+             main = paste("Sampling Distribution of", input$fun),
+             breaks = 50,
+             xlab = sprintf("%s(x)", input$fun),
+             col = "dodgerblue", 
+             border = "black",
+             cex.lab = 1.5,
+             cex.main = 1.5,
+             xlim = xlim)
+    }, height = 500, width = 1000)
 }
+
+# Run the application 
 shinyApp(ui = ui, server = server)</code></pre>
 
 
