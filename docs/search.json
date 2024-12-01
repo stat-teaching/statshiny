@@ -1,0 +1,23 @@
+[
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "About",
+    "section": "",
+    "text": "About this site"
+  },
+  {
+    "objectID": "shiny/sampdist.html",
+    "href": "shiny/sampdist.html",
+    "title": "statshiny",
+    "section": "",
+    "text": "Ciao come va\n#| '!! shinylive warning !!': |\n#|   shinylive does not work in self-contained HTML documents.\n#|   Please set `embed-resources: false` in your metadata.\n#| standalone: true\n#| viewerHeight: 800\nlibrary(shiny)\nui &lt;- fluidPage(\n  titlePanel(\"Hello Shiny!\"),\n  sidebarLayout(\n    sidebarPanel(\n      sliderInput(\n        inputId = \"bins\",\n        label = \"Number of bins:\",\n        min = 1,\n        max = 50,\n        value = 30\n      )\n    ),\n    mainPanel(\n      plotOutput(outputId = \"distPlot\")\n    )\n  )\n)\nserver &lt;- function(input, output) {\n  output$distPlot &lt;- renderPlot({\n    x &lt;- faithful$waiting\n    bins &lt;- seq(min(x), max(x), length.out = input$bins + 1)\n    hist(x,\n      breaks = bins, col = \"#75AADB\", border = \"white\",\n      xlab = \"Waiting time to next eruption (in mins)\",\n      main = \"Histogram of waiting times\"\n    )\n  })\n}\nshinyApp(ui = ui, server = server)"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "statshiny",
+    "section": "",
+    "text": "This is a Quarto website.\nTo learn more about Quarto websites visit https://quarto.org/docs/websites.\nprova"
+  }
+]
