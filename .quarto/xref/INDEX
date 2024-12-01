@@ -7,5 +7,8 @@
   },
   "about.qmd": {
     "about.html": "8aa1df4c"
+  },
+  "shiny/power.qmd": {
+    "power.html": "3818a690"
   }
 }

@@ -1,6 +1,10 @@
 ---
 filters: 
   - shinylive
+format:
+  html:
+    grid: 
+      body-width: 1300px
 ---
 
 ```{shinylive-r}
@@ -81,7 +85,8 @@ server <- function(input, output) {
         xlim <- if (input$fixAxis) {
             c(input$xMin, input$xMax)
         } else {
-            NULL
+            #c(input$mean - input$sd*5, input$mean + input$sd*5)
+            range(results)
         }
         
         # Plot histogram
@@ -93,8 +98,8 @@ server <- function(input, output) {
              border = "black",
              cex.lab = 1.5,
              cex.main = 1.5,
-             xlim = xlim)
-    }, height = 500, width = 1000)
+             xlim = )
+    }, height = 500, width = 700)
 }
 
 # Run the application 
