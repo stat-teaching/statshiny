@@ -8,4 +8,5 @@ This is a Quarto website.
 
 To learn more about Quarto websites visit <https://quarto.org/docs/websites>.
 
-[prova](shiny/sampdist.qmd)
+[sampling distribution](shiny/sampdist.qmd)
+[power](shiny/power.qmd)
