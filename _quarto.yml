@@ -3,13 +3,14 @@ project:
   output-dir: docs
 
 website:
-  title: "statshiny"
+  title: "StatShiny"
   navbar:
     left:
       - href: index.qmd
         text: Home
-      - about.qmd
-
+    tools:
+      - icon: github
+        href: https://github.com/stat-teaching/statshiny
 format:
   html:
     theme: cosmo

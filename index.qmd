@@ -1,12 +1,17 @@
 ---
-title: "statshiny"
-filters: 
-    - shinylive
+title: "StatShiny"
 ---
 
-This is a Quarto website.
+This is a website containing several Shiny apps and visualization for teaching statistics and Psychometrics.
 
-To learn more about Quarto websites visit <https://quarto.org/docs/websites>.
+## Shiny Apps
 
-[sampling distribution](shiny/sampdist.qmd)
-[power](shiny/power.qmd)
+```{r}
+#| echo: false
+#| output: asis
+
+qmd <- list.files("shiny", pattern = "*.qmd", full.names = TRUE)
+sprintf("### [%s](%s)", xfun::sans_ext(basename(qmd)), qmd) |> 
+    cat(sep = "\n")
+```
+
