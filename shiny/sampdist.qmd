@@ -29,8 +29,8 @@ ui <- fluidPage(
             checkboxInput("fixAxis", "Fix x-axis limits?", value = FALSE),
             conditionalPanel(
                 condition = "input.fixAxis == true",
-                numericInput("xMin", "X-axis Minimum:", value = -10, step = 1),
-                numericInput("xMax", "X-axis Maximum:", value = 10, step = 1)
+                numericInput("xMin", "X-axis Minimum:", value = -1, step = 1),
+                numericInput("xMax", "X-axis Maximum:", value = 1, step = 1)
             ),
             actionButton("simulate", "Simulate")
         ),
@@ -98,7 +98,7 @@ server <- function(input, output) {
              border = "black",
              cex.lab = 1.5,
              cex.main = 1.5,
-             xlim = )
+             xlim = xlim)
     }, height = 500, width = 700)
 }
 
