@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>StatShiny</title>
+<title>power-meta – StatShiny</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -23,22 +23,27 @@ ul.task-list li input[type="checkbox"] {
 </style>
 
 
-<script src="site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="site_libs/quarto-nav/headroom.min.js"></script>
-<script src="site_libs/clipboard/clipboard.min.js"></script>
-<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="site_libs/quarto-search/fuse.min.js"></script>
-<script src="site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="./">
-<script src="site_libs/quarto-html/quarto.js"></script>
-<script src="site_libs/quarto-html/popper.min.js"></script>
-<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="site_libs/quarto-html/anchor.min.js"></script>
-<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-29e2c20b02301cfff04dc8050bf30c7e.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-1322888c997fad56b0b4d776d35cf542.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-29e2c20b02301cfff04dc8050bf30c7e.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-9954961ef59e8c5e82c0e0370a4b7079.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<meta name="shinylive:serviceworker_dir" content="..">
+<script src="../site_libs/quarto-contrib/shinylive-0.9.1/shinylive/load-shinylive-sw.js" type="module"></script>
+<script src="../site_libs/quarto-contrib/shinylive-0.9.1/shinylive/run-python-blocks.js" type="module"></script>
+<link href="../site_libs/quarto-contrib/shinylive-0.9.1/shinylive/shinylive.css" rel="stylesheet">
+<link href="../site_libs/quarto-contrib/shinylive-quarto-css/shinylive-quarto.css" rel="stylesheet">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -68,7 +73,7 @@ ul.task-list li input[type="checkbox"] {
 }</script>
 
 
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="../styles.css">
 </head>
 
 <body class="nav-fixed">
@@ -78,7 +83,7 @@ ul.task-list li input[type="checkbox"] {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a class="navbar-brand" href="./index.html">
+    <a class="navbar-brand" href="../index.html">
     <span class="navbar-title">StatShiny</span>
     </a>
   </div>
@@ -89,7 +94,7 @@ ul.task-list li input[type="checkbox"] {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link active" href="./index.html" aria-current="page"> 
+    <a class="nav-link" href="../index.html"> 
 <span class="menu-text">Home</span></a>
   </li>  
 </ul>
@@ -104,57 +109,134 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#shiny-apps" id="toc-shiny-apps" class="nav-link active" data-scroll-target="#shiny-apps">Shiny Apps</a>
-  <ul class="collapse">
-  <li><a href="#power-meta" id="toc-power-meta" class="nav-link" data-scroll-target="#power-meta">power-meta</a></li>
-  <li><a href="#power" id="toc-power" class="nav-link" data-scroll-target="#power">power</a></li>
-  <li><a href="#sampdist" id="toc-sampdist" class="nav-link" data-scroll-target="#sampdist">sampdist</a></li>
-  </ul></li>
-  </ul>
-</nav>
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+        
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content">
-
-<header id="title-block-header" class="quarto-title-block default">
-<div class="quarto-title">
-<h1 class="title">StatShiny</h1>
-</div>
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
 
 
 
-<div class="quarto-title-meta">
 
-    
-  
-    
-  </div>
-  
+<pre class="shinylive-r" data-engine="r"><code>#| '!! shinylive warning !!': |
+#|   shinylive does not work in self-contained HTML documents.
+#|   Please set `embed-resources: false` in your metadata.
+#| standalone: true
+#| viewerHeight: 800
+
+# Load necessary libraries
+library(shiny)
+library(ggplot2)
+
+# Define the meta.power function
+meta.power &lt;- function(k, d, tau2, n, alpha = 0.05){
+    vt &lt;- 1/n + 1/n
+    V &lt;- (tau2 + vt)/k
+    z &lt;- d / sqrt(V)
+    zc &lt;- abs(qnorm(alpha/2))
+    1 - pnorm(zc - z) + pnorm(-zc - z)
+}
+
+# Define UI for the application
+ui &lt;- fluidPage(
+    # Application title
+    titlePanel("Meta Power Calculator with Power Curve"),
+
+    # Sidebar layout with input fields
+    sidebarLayout(
+        sidebarPanel(
+            numericInput("k", "Number of studies (k):", value = 5, min = 1),
+            checkboxInput("flag_k", "Vary k?", value = FALSE),
+            numericInput("d", "Effect size (d):", value = 0.5),
+            checkboxInput("flag_d", "Vary d?", value = FALSE),
+            numericInput("tau2", "Between-study variance (tau^2):", value = 0.1),
+            checkboxInput("flag_tau2", "Vary tau^2?", value = FALSE),
+            numericInput("n", "Sample size per group (n):", value = 50),
+            checkboxInput("flag_n", "Vary n?", value = FALSE),
+            numericInput("alpha", "Significance level (alpha):", value = 0.05, step = 0.01),
+            checkboxInput("flag_alpha", "Vary alpha?", value = FALSE),
+
+            hr(),
+            numericInput("minRange", "Min value for flagged variable:", value = 1),
+            numericInput("maxRange", "Max value for flagged variable:", value = 50),
+            actionButton("calc", "Calculate Power Curve")
+        ),
+
+        # Main panel to display results
+        mainPanel(
+            plotOutput("powerPlot"),
+            textOutput("curveDescription")
+        )
+    )
+)
+
+# Define server logic
+server &lt;- function(input, output) {
+
+    observeEvent(input$calc, {
+
+        # Extract input values
+        k &lt;- input$k
+        d &lt;- input$d
+        tau2 &lt;- input$tau2
+        n &lt;- input$n
+        alpha &lt;- input$alpha
+
+        # Range for the flagged variable
+        min_range &lt;- input$minRange
+        max_range &lt;- input$maxRange
+        range &lt;- seq(min_range, max_range, length.out = 100)
+
+        # Identify which variable is flagged and vary it across the range
+        if(input$flag_k){
+            varied_var &lt;- "k"
+            power_values &lt;- sapply(range, function(v) meta.power(v, d, tau2, n, alpha))
+        } else if(input$flag_d){
+            varied_var &lt;- "d"
+            power_values &lt;- sapply(range, function(v) meta.power(k, v, tau2, n, alpha))
+        } else if(input$flag_tau2){
+            varied_var &lt;- "tau2"
+            power_values &lt;- sapply(range, function(v) meta.power(k, d, v, n, alpha))
+        } else if(input$flag_n){
+            varied_var &lt;- "n"
+            power_values &lt;- sapply(range, function(v) meta.power(k, d, tau2, v, alpha))
+        } else if(input$flag_alpha){
+            varied_var &lt;- "alpha"
+            power_values &lt;- sapply(range, function(v) meta.power(k, d, tau2, n, v))
+        } else {
+            varied_var &lt;- "None"
+            power_values &lt;- NULL
+        }
+
+        # Plot the power curve
+        output$powerPlot &lt;- renderPlot({
+            if(!is.null(power_values)){
+                plot_data &lt;- data.frame(
+                    VarValue = range,
+                    Power = power_values
+                )
+                ggplot(plot_data, aes(x = VarValue, y = Power)) +
+                    geom_line(color = "blue") +
+                    labs(x = varied_var, y = "Power", title = paste("Power Curve by varying", varied_var)) +
+                    theme_minimal()
+            }
+        })
+
+        # Output description of curve
+        output$curveDescription &lt;- renderText({
+            if(varied_var != "None"){
+                paste("Power curve by varying", varied_var, "from", min_range, "to", max_range)
+            } else {
+                "No variable flagged for variation."
+            }
+        })
+    })
+}
+
+# Run the application
+shinyApp(ui = ui, server = server)</code></pre>
 
 
-</header>
-
-
-<p>This is a website containing several Shiny apps and visualization for teaching statistics and Psychometrics.</p>
-<section id="shiny-apps" class="level2">
-<h2 class="anchored" data-anchor-id="shiny-apps">Shiny Apps</h2>
-<section id="power-meta" class="level3">
-<h3 class="anchored" data-anchor-id="power-meta"><a href="./shiny/power-meta.html">power-meta</a></h3>
-</section>
-<section id="power" class="level3">
-<h3 class="anchored" data-anchor-id="power"><a href="./shiny/power.html">power</a></h3>
-</section>
-<section id="sampdist" class="level3">
-<h3 class="anchored" data-anchor-id="sampdist"><a href="./shiny/sampdist.html">sampdist</a></h3>
-
-
-</section>
-</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

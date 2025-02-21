@@ -10,5 +10,8 @@
   },
   "shiny/power.qmd": {
     "power.html": "3818a690"
+  },
+  "shiny/power-meta.qmd": {
+    "power-meta.html": "5f6d2dfc"
   }
 }
