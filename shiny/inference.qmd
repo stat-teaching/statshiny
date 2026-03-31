@@ -1,0 +1,155 @@
+---
+filters: 
+  - shinylive
+format:
+  html:
+    grid: 
+      body-width: 1300px
+---
+
+```{shinylive-r}
+#| standalone: true
+#| viewerHeight: 800
+
+library(shiny)
+library(latex2exp)
+
+plot_hypothesis_comparison <- function(mu0, mu1, n, s, alpha = 0.05, tails = "two", is_std = FALSE, x_range = NULL) {
+    # --- 1. Parametrizzazione ---
+    # Se standardizzato, mu0 = 0, mu1 = d, s = 1
+    m0 <- if(is_std) 0 else mu0
+    m1 <- if(is_std) mu1 else mu1 # In modalità std, mu1 viene passato come d
+    sd_val <- if(is_std) 1 else s
+    
+    se <- sd_val / sqrt(n)
+    
+    # --- 2. Calcoli Statistici ---
+    crit_low <- -Inf; crit_high <- Inf
+    if (tails == "two") {
+        crit_low  <- qnorm(alpha/2, m0, se)
+        crit_high <- qnorm(1 - alpha/2, m0, se)
+        beta_val  <- pnorm(crit_high, m1, se) - pnorm(crit_low, m1, se)
+    } else if (tails == "right") {
+        crit_high <- qnorm(1 - alpha, m0, se)
+        beta_val  <- pnorm(crit_high, m1, se)
+    } else {
+        crit_low  <- qnorm(alpha, m0, se)
+        beta_val  <- 1 - pnorm(crit_low, m1, se)
+    }
+    
+    power_val <- 1 - beta_val
+    y_max <- dnorm(m0, m0, se)
+    y_text <- y_max / 2
+    
+    # Gestione Assi
+    if (is.null(x_range)) {
+        x_range <- c(min(m0, m1) - 4*se, max(m0, m1) + 4*se)
+    }
+    
+    # --- 3. Grafica ---
+    old_par <- par(mfrow = c(2, 1), mar = c(4, 4, 2, 2))
+    on.exit(par(old_par))
+    
+    # Grafico H0
+    curve(dnorm(x, m0, se), from = x_range[1], to = x_range[2], 
+          ylab = "Densità", main = TeX(r"($H_0$)"), xaxt = "n", xlab = "")
+    
+    if(is.finite(crit_low)) {
+        x_a <- seq(x_range[1], crit_low, length = 100)
+        polygon(c(x_a, crit_low), c(dnorm(x_a, m0, se), 0), col = rgb(0,0,0,0.1), border = NA)
+        text(crit_low, y_text, round(crit_low, 2), pos = 2, cex = 0.8)
+    }
+    if(is.finite(crit_high)) {
+        x_a <- seq(crit_high, x_range[2], length = 100)
+        polygon(c(crit_high, x_a), c(0, dnorm(x_a, m0, se)), col = rgb(0,0,0,0.1), border = NA)
+        text(crit_high, y_text, round(crit_high, 2), pos = 4, cex = 0.8)
+    }
+    abline(v = c(m0, crit_low[is.finite(crit_low)], crit_high[is.finite(crit_high)]), lty = c(1, 3, 3))
+    text(m0, y_text, if(is_std) "0" else TeX(r"($\mu_0$)"), pos = 4)
+    legend("topright", legend = TeX(sprintf(r"($\alpha = %.3f$)", alpha)), fill = rgb(0,0,0,0.1), bty = "n")
+    
+    # Grafico H1
+    curve(dnorm(x, m1, se), from = x_range[1], to = x_range[2], 
+          ylab = "Densità", xlab = if(is_std) "Effect Size (d)" else "Media Campionaria", main = TeX(r"($H_1$)"))
+    
+    # Area Beta
+    xb_min <- max(x_range[1], if(is.finite(crit_low)) crit_low else x_range[1])
+    xb_max <- min(x_range[2], if(is.finite(crit_high)) crit_high else x_range[2])
+    if(xb_min < xb_max) {
+        x_b <- seq(xb_min, xb_max, length = 200)
+        polygon(c(xb_min, x_b, xb_max), c(0, dnorm(x_b, m1, se), 0), col = "lightblue", border = NA)
+    }
+    
+    # Area Power
+    if(is.finite(crit_low)) {
+        x_p <- seq(x_range[1], crit_low, length = 100)
+        polygon(c(x_p, crit_low), c(dnorm(x_p, m1, se), 0), col = "lightgreen", border = NA)
+    }
+    if(is.finite(crit_high)) {
+        x_p <- seq(crit_high, x_range[2], length = 100)
+        polygon(c(crit_high, x_p), c(0, dnorm(x_p, m1, se)), col = "lightgreen", border = NA)
+    }
+    abline(v = c(m1, crit_low[is.finite(crit_low)], crit_high[is.finite(crit_high)]), lty = c(1, 3, 3))
+    text(m1, y_text, if(is_std) TeX(sprintf(r"($d = %.2f$)", m1)) else TeX(r"($\mu_1$)"), pos = 4)
+    legend("topright", 
+           legend = c(TeX(sprintf(r"($\beta = %.3f$)", beta_val)), 
+                      TeX(sprintf(r"($1 - \beta = %.3f$)", power_val))), 
+           fill = c("lightblue", "lightgreen"), bty = "n")
+}
+
+ui <- fluidPage(
+    titlePanel("Inferenza"),
+    sidebarLayout(
+        sidebarPanel(
+            radioButtons("tails", "Tipo di Test:",
+                         choices = list("Due Code" = "two", "Destra" = "right", "Sinistra" = "left")),
+            hr(),
+            sliderInput("n", "Dimensione Campione (n):", min = 2, max = 1000, value = 30),
+            numericInput("alpha", "Alpha:", value = 0.05, step = 0.01),
+            hr(),
+            # Selezione modalità
+            radioButtons("mode", "Modalità Input:", 
+                         choices = list("Valori Reali" = "real", "Standardizzato (d)" = "std")),
+            
+            conditionalPanel(
+                condition = "input.mode == 'real'",
+                numericInput("mu0", "Media H0:", value = 163),
+                numericInput("mu1", "Media H1:", value = 165),
+                numericInput("s", "Deviazione Standard:", value = 8)
+            ),
+            conditionalPanel(
+                condition = "input.mode == 'std'",
+                numericInput("cohen_d", "Cohen's d:", value = 0.5, step = 0.1)
+            ),
+            hr(),
+            checkboxInput("fix_axes", "Blocca Assi X", value = FALSE),
+            conditionalPanel(
+                condition = "input.fix_axes == true",
+                fluidRow(
+                    column(6, numericInput("xmin", "X Min:", value = -1)),
+                    column(6, numericInput("xmax", "X Max:", value = 2))
+                )
+            )
+        ),
+        mainPanel(plotOutput("hypPlot", height = "650px"))
+    )
+)
+
+server <- function(input, output) {
+    output$hypPlot <- renderPlot({
+        # Definizione range assi
+        x_range <- if(input$fix_axes) c(input$xmin, input$xmax) else NULL
+        
+        if (input$mode == "real") {
+            plot_hypothesis_comparison(input$mu0, input$mu1, input$n, input$s, 
+                                       input$alpha, input$tails, is_std = FALSE, x_range = x_range)
+        } else {
+            # In modalità std: mu0 e s sono ignorati dalla funzione interna
+            plot_hypothesis_comparison(0, input$cohen_d, input$n, 1, 
+                                       input$alpha, input$tails, is_std = TRUE, x_range = x_range)
+        }
+    })
+}
+
+shinyApp(ui, server)
+```
