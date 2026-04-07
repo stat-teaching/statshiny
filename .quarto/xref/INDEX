@@ -16,5 +16,8 @@
   },
   "shiny/inference.qmd": {
     "inference.html": "bb9a9bc1"
+  },
+  "shiny/d.qmd": {
+    "d.html": "54d2a1aa"
   }
 }

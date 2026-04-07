@@ -1,0 +1,92 @@
+---
+filters: 
+  - shinylive
+format:
+  html:
+    grid: 
+      body-width: 1300px
+---
+
+```{shinylive-r}
+#| standalone: true
+#| viewerHeight: 800
+
+# Lista dei pacchetti necessari
+library(shiny)
+library(ggplot2)
+
+ui <- fluidPage(
+  titlePanel("Visualizzatore Distribuzioni"),
+  sidebarLayout(
+    sidebarPanel(
+      radioButtons("mode", "Input:", 
+                   choices = c("Liberi" = "free", "Grado d" = "d_score")),
+      hr(),
+      conditionalPanel(
+        condition = "input.mode == 'free'",
+        fluidRow(
+          column(6, h5("Pop. 1"),
+                 numericInput("m1", "Media", 0),
+                 numericInput("sd1", "SD", 1, min=0.1)),
+          column(6, h5("Pop. 2"),
+                 numericInput("m2", "Media", 2),
+                 numericInput("sd2", "SD", 1, min=0.1))
+        )
+      ),
+      conditionalPanel(
+        condition = "input.mode == 'd_score'",
+        sliderInput("d_val", "Grado d:", 0, 5, 0.8, 0.1),
+        numericInput("sd2_d", "SD Pop. 2:", 1, 0.1)
+      )
+    ),
+    mainPanel(
+      plotOutput("distPlot"),
+      tableOutput("summaryTable")
+    )
+  )
+)
+
+server <- function(input, output) {
+  params <- reactive({
+    if (input$mode == "free") {
+      m1 <- if(is.na(input$m1)) 0 else input$m1
+      s1 <- if(is.na(input$sd1) || input$sd1 <= 0) 0.1 else input$sd1
+      m2 <- if(is.na(input$m2)) 0 else input$m2
+      s2 <- if(is.na(input$sd2) || input$sd2 <= 0) 0.1 else input$sd2
+      list(m1=m1, s1=s1, m2=m2, s2=s2)
+    } else {
+      s1 <- 1; m1 <- 0
+      s2 <- if(is.na(input$sd2_d) || input$sd2_d <= 0) 0.1 else input$sd2_d
+      d  <- if(is.na(input$d_val)) 0 else input$d_val
+      m2 <- d * sqrt((s1^2 + s2^2)/2) + m1
+      list(m1=m1, s1=s1, m2=m2, s2=s2)
+    }
+  })
+
+  output$distPlot <- renderPlot({
+    p <- params()
+    x <- seq(min(p$m1-4*p$s1, p$m2-4*p$s2), max(p$m1+4*p$s1, p$m2+4*p$s2), length.out=200)
+    df <- data.frame(
+      x = rep(x, 2),
+      y = c(dnorm(x, p$m1, p$s1), dnorm(x, p$m2, p$s2)),
+      Pop = rep(c("Pop 1", "Pop 2"), each=200)
+    )
+    ggplot(df, aes(x, y, fill=Pop)) + 
+      geom_area(alpha=0.4, position="identity") +
+      theme_minimal() + theme(legend.position="bottom")
+  })
+
+  output$summaryTable <- renderTable({
+    p <- params()
+    dp <- sqrt((p$s1^2 + p$s2^2)/2)
+    data.frame(
+      Parametro = c("Media", "SD", "Cohen's d"),
+      Pop1 = c(p$m1, p$s1, "-"),
+      Pop2 = c(p$m2, p$s2, "-"),
+      D = c("-", "-", round(abs(p$m1-p$m2)/dp, 3))
+    )
+  })
+}
+
+shinyApp(ui, server)
+```

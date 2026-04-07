@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>StatShiny</title>
+<title>d – StatShiny</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -23,24 +23,29 @@ ul.task-list li input[type="checkbox"] {
 </style>
 
 
-<script src="site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="site_libs/quarto-nav/headroom.min.js"></script>
-<script src="site_libs/clipboard/clipboard.min.js"></script>
-<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="site_libs/quarto-search/fuse.min.js"></script>
-<script src="site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="./">
-<script src="site_libs/quarto-html/quarto.js" type="module"></script>
-<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
-<script src="site_libs/quarto-html/popper.min.js"></script>
-<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="site_libs/quarto-html/anchor.min.js"></script>
-<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-ea1d7ac60288e0f1efdbc993fd8432ae.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-cfff8c2e93e78d74a123ac515f9bba40.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-ea1d7ac60288e0f1efdbc993fd8432ae.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-21da7cd41be68b1690735e3940772ad5.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<meta name="shinylive:serviceworker_dir" content="..">
+<script src="../site_libs/quarto-contrib/shinylive-0.9.1/shinylive/load-shinylive-sw.js" type="module"></script>
+<script src="../site_libs/quarto-contrib/shinylive-0.9.1/shinylive/run-python-blocks.js" type="module"></script>
+<link href="../site_libs/quarto-contrib/shinylive-0.9.1/shinylive/shinylive.css" rel="stylesheet">
+<link href="../site_libs/quarto-contrib/shinylive-quarto-css/shinylive-quarto.css" rel="stylesheet">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -70,7 +75,7 @@ ul.task-list li input[type="checkbox"] {
 }</script>
 
 
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="../styles.css">
 </head>
 
 <body class="nav-fixed quarto-light">
@@ -80,9 +85,9 @@ ul.task-list li input[type="checkbox"] {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a href="./index.html" class="navbar-brand navbar-brand-logo">
+    <a href="../index.html" class="navbar-brand navbar-brand-logo">
     </a>
-    <a class="navbar-brand" href="./index.html">
+    <a class="navbar-brand" href="../index.html">
     <span class="navbar-title">StatShiny</span>
     </a>
   </div>
@@ -93,7 +98,7 @@ ul.task-list li input[type="checkbox"] {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link active" href="./index.html" aria-current="page"> 
+    <a class="nav-link" href="../index.html"> 
 <span class="menu-text">Home</span></a>
   </li>  
 </ul>
@@ -108,65 +113,101 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#shiny-apps" id="toc-shiny-apps" class="nav-link active" data-scroll-target="#shiny-apps">Shiny Apps</a>
-  <ul class="collapse">
-  <li><a href="#d" id="toc-d" class="nav-link" data-scroll-target="#d">d</a></li>
-  <li><a href="#inference" id="toc-inference" class="nav-link" data-scroll-target="#inference">inference</a></li>
-  <li><a href="#power-meta" id="toc-power-meta" class="nav-link" data-scroll-target="#power-meta">power-meta</a></li>
-  <li><a href="#power" id="toc-power" class="nav-link" data-scroll-target="#power">power</a></li>
-  <li><a href="#sampdist" id="toc-sampdist" class="nav-link" data-scroll-target="#sampdist">sampdist</a></li>
-  </ul></li>
-  </ul>
-</nav>
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+        
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content">
-
-<header id="title-block-header" class="quarto-title-block default">
-<div class="quarto-title">
-<h1 class="title">StatShiny</h1>
-</div>
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
 
 
 
-<div class="quarto-title-meta">
 
-    
-  
-    
-  </div>
-  
+<pre class="shinylive-r" data-engine="r"><code>#| '!! shinylive warning !!': |
+#|   shinylive does not work in self-contained HTML documents.
+#|   Please set `embed-resources: false` in your metadata.
+#| standalone: true
+#| viewerHeight: 800
+
+# Lista dei pacchetti necessari
+library(shiny)
+library(ggplot2)
+
+ui &lt;- fluidPage(
+  titlePanel("Visualizzatore Distribuzioni"),
+  sidebarLayout(
+    sidebarPanel(
+      radioButtons("mode", "Input:", 
+                   choices = c("Liberi" = "free", "Grado d" = "d_score")),
+      hr(),
+      conditionalPanel(
+        condition = "input.mode == 'free'",
+        fluidRow(
+          column(6, h5("Pop. 1"),
+                 numericInput("m1", "Media", 0),
+                 numericInput("sd1", "SD", 1, min=0.1)),
+          column(6, h5("Pop. 2"),
+                 numericInput("m2", "Media", 2),
+                 numericInput("sd2", "SD", 1, min=0.1))
+        )
+      ),
+      conditionalPanel(
+        condition = "input.mode == 'd_score'",
+        sliderInput("d_val", "Grado d:", 0, 5, 0.8, 0.1),
+        numericInput("sd2_d", "SD Pop. 2:", 1, 0.1)
+      )
+    ),
+    mainPanel(
+      plotOutput("distPlot"),
+      tableOutput("summaryTable")
+    )
+  )
+)
+
+server &lt;- function(input, output) {
+  params &lt;- reactive({
+    if (input$mode == "free") {
+      m1 &lt;- if(is.na(input$m1)) 0 else input$m1
+      s1 &lt;- if(is.na(input$sd1) || input$sd1 &lt;= 0) 0.1 else input$sd1
+      m2 &lt;- if(is.na(input$m2)) 0 else input$m2
+      s2 &lt;- if(is.na(input$sd2) || input$sd2 &lt;= 0) 0.1 else input$sd2
+      list(m1=m1, s1=s1, m2=m2, s2=s2)
+    } else {
+      s1 &lt;- 1; m1 &lt;- 0
+      s2 &lt;- if(is.na(input$sd2_d) || input$sd2_d &lt;= 0) 0.1 else input$sd2_d
+      d  &lt;- if(is.na(input$d_val)) 0 else input$d_val
+      m2 &lt;- d * sqrt((s1^2 + s2^2)/2) + m1
+      list(m1=m1, s1=s1, m2=m2, s2=s2)
+    }
+  })
+
+  output$distPlot &lt;- renderPlot({
+    p &lt;- params()
+    x &lt;- seq(min(p$m1-4*p$s1, p$m2-4*p$s2), max(p$m1+4*p$s1, p$m2+4*p$s2), length.out=200)
+    df &lt;- data.frame(
+      x = rep(x, 2),
+      y = c(dnorm(x, p$m1, p$s1), dnorm(x, p$m2, p$s2)),
+      Pop = rep(c("Pop 1", "Pop 2"), each=200)
+    )
+    ggplot(df, aes(x, y, fill=Pop)) + 
+      geom_area(alpha=0.4, position="identity") +
+      theme_minimal() + theme(legend.position="bottom")
+  })
+
+  output$summaryTable &lt;- renderTable({
+    p &lt;- params()
+    dp &lt;- sqrt((p$s1^2 + p$s2^2)/2)
+    data.frame(
+      Parametro = c("Media", "SD", "Cohen's d"),
+      Pop1 = c(p$m1, p$s1, "-"),
+      Pop2 = c(p$m2, p$s2, "-"),
+      D = c("-", "-", round(abs(p$m1-p$m2)/dp, 3))
+    )
+  })
+}
+
+shinyApp(ui, server)</code></pre>
 
 
-</header>
-
-
-<p>This is a website containing several Shiny apps and visualization for teaching statistics and Psychometrics.</p>
-<section id="shiny-apps" class="level2">
-<h2 class="anchored" data-anchor-id="shiny-apps">Shiny Apps</h2>
-<section id="d" class="level3">
-<h3 class="anchored" data-anchor-id="d"><a href="./shiny/d.html">d</a></h3>
-</section>
-<section id="inference" class="level3">
-<h3 class="anchored" data-anchor-id="inference"><a href="./shiny/inference.html">inference</a></h3>
-</section>
-<section id="power-meta" class="level3">
-<h3 class="anchored" data-anchor-id="power-meta"><a href="./shiny/power-meta.html">power-meta</a></h3>
-</section>
-<section id="power" class="level3">
-<h3 class="anchored" data-anchor-id="power"><a href="./shiny/power.html">power</a></h3>
-</section>
-<section id="sampdist" class="level3">
-<h3 class="anchored" data-anchor-id="sampdist"><a href="./shiny/sampdist.html">sampdist</a></h3>
-
-
-</section>
-</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
