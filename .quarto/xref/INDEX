@@ -19,5 +19,8 @@
   },
   "shiny/d.qmd": {
     "d.html": "54d2a1aa"
+  },
+  "shiny/ttest.qmd": {
+    "ttest.html": "5f1045d3"
   }
 }
