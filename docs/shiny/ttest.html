@@ -127,6 +127,8 @@ ul.task-list li input[type="checkbox"] {
 #|   Please set `embed-resources: false` in your metadata.
 #| standalone: true
 #| viewerHeight: 800
+
+
 library(shiny)
 library(latex2exp)
 
@@ -134,220 +136,234 @@ library(latex2exp)
 plot_hypothesis_comparison &lt;- function(d_eff, n1, n2, s1, s2, alpha = 0.05, 
                                        tails = "two", dist_type = "t", 
                                        obs_stat = NULL, x_range = NULL, 
-                                       is_std = FALSE, show_ci = FALSE) {
-  
-  s_pooled_sq &lt;- ((n1 - 1) * s1^2 + (n2 - 1) * s2^2) / (n1 + n2 - 2)
-  sp &lt;- sqrt(s_pooled_sq)
-  se &lt;- sp * sqrt(1/n1 + 1/n2)
-  df_val &lt;- n1 + n2 - 2
-  
-  m0 &lt;- 0
-  m1 &lt;- if(is_std) d_eff / se else d_eff 
-  curr_se &lt;- if(is_std) 1 else se
-  curr_obs &lt;- if(!is.null(obs_stat) &amp;&amp; !is.na(obs_stat)) (if(is_std) obs_stat / se else obs_stat) else NULL
-  
-  dfunc &lt;- if(dist_type == "z") dnorm else function(x, m, s) dt((x-m)/s, df_val)/s
-  pfunc &lt;- if(dist_type == "z") pnorm else function(q, m, s) pt((q-m)/s, df_val)
-  qfunc &lt;- if(dist_type == "z") qnorm else function(p, m, s) qt(p, df_val)*s + m
-  
-  # Soglie critiche su H0
-  crit_low &lt;- -Inf; crit_high &lt;- Inf
-  if (tails == "two") {
-    crit_low  &lt;- qfunc(alpha/2, m0, curr_se)
-    crit_high &lt;- qfunc(1 - alpha/2, m0, curr_se)
-  } else if (tails == "right") {
-    crit_high &lt;- qfunc(1 - alpha, m0, curr_se)
-  } else {
-    crit_low  &lt;- qfunc(alpha, m0, curr_se)
-  }
-  
-  if (is.null(x_range)) {
-    vals &lt;- c(m0, m1, crit_low[is.finite(crit_low)], crit_high[is.finite(crit_high)])
-    if(!is.null(curr_obs)) vals &lt;- c(vals, curr_obs)
-    x_range &lt;- c(min(vals) - 4*curr_se, max(vals) + 4*curr_se)
-  }
-  
-  old_par &lt;- par(mfrow = c(2, 1), mar = c(4, 4, 3, 2))
-  on.exit(par(old_par))
-  
-  # --- 1. GRAFICO H0 ---
-  y_max_h0 &lt;- dfunc(m0, m0, curr_se)
-  curve(dfunc(x, m0, curr_se), from = x_range[1], to = x_range[2], 
-        ylab = "Densità", main = TeX(r"($H_0$)"), xaxt = "n", xlab = "")
-  
-  if(is.finite(crit_low)) {
-    x_a &lt;- seq(x_range[1], crit_low, length = 100)
-    polygon(c(x_a, crit_low), c(dfunc(x_a, m0, curr_se), 0), density = 20, angle = 45, col = "black")
-  }
-  if(is.finite(crit_high)) {
-    x_a &lt;- seq(crit_high, x_range[2], length = 100)
-    polygon(c(crit_high, x_a), c(0, dfunc(x_a, m0, curr_se)), density = 20, angle = 45, col = "black")
-  }
-  
-  if (!is.null(curr_obs)) {
-    y_obs &lt;- dfunc(curr_obs, m0, curr_se)
-    if (tails == "right" || (tails == "two" &amp;&amp; curr_obs &gt; m0)) {
-      px &lt;- seq(abs(curr_obs), x_range[2], length = 100)
-      polygon(c(abs(curr_obs), px, x_range[2]), c(0, dfunc(px, m0, curr_se), 0), col = rgb(1,0,0,0.3), border = NA)
-    }
-    if (tails == "left" || (tails == "two" &amp;&amp; curr_obs &lt; m0)) {
-      px &lt;- seq(x_range[1], -abs(curr_obs), length = 100)
-      polygon(c(x_range[1], px, -abs(curr_obs)), c(0, dfunc(px, m0, curr_se), 0), col = rgb(1,0,0,0.3), border = NA)
-    }
-    points(curr_obs, 0, col = "red", pch = 19, cex = 1.3)
-    pv_val &lt;- if(tails == "right") 1 - pfunc(curr_obs, m0, curr_se) else 
-      if(tails == "left") pfunc(curr_obs, m0, curr_se) else 2 * (1 - pfunc(abs(curr_obs), m0, curr_se))
-    text(curr_obs, y_obs, labels = paste("p =", round(pv_val, 4)), pos = 3, col = "red", font = 2)
+                                       is_std = FALSE, show_ci = FALSE,
+                                       show_plots = c("H0", "H1")) {
     
-    if (show_ci) {
-      y_pos_h0 &lt;- y_max_h0 * 0.20
-      z_crit &lt;- if(tails == "two") qfunc(1 - alpha/2, 0, curr_se) else qfunc(1 - alpha, 0, curr_se)
-      if (tails == "two") {
-        ci_l &lt;- curr_obs - z_crit; ci_h &lt;- curr_obs + z_crit
-        lines(c(ci_l, ci_h), c(y_pos_h0, y_pos_h0), col = "darkred", lwd = 3)
-      } else if (tails == "right") {
-        ci_l &lt;- curr_obs - z_crit
-        lines(c(ci_l, x_range[2]-curr_se), c(y_pos_h0, y_pos_h0), col = "darkred", lwd = 3)
-        lines(c(x_range[2]-curr_se, x_range[2]), c(y_pos_h0, y_pos_h0), col = "darkred", lwd = 3, lty = 3)
-      } else {
-        ci_h &lt;- curr_obs + z_crit
-        lines(c(x_range[1]+curr_se, ci_h), c(y_pos_h0, y_pos_h0), col = "darkred", lwd = 3)
-        lines(c(x_range[1], x_range[1]+curr_se), c(y_pos_h0, y_pos_h0), col = "darkred", lwd = 3, lty = 3)
-      }
-    }
-  }
-  abline(v = c(m0, crit_low[is.finite(crit_low)], crit_high[is.finite(crit_high)]), lty = c(1, 3, 3), col = c("black", "blue", "blue"))
-  axis(1)
-  
-  # --- 2. GRAFICO H1 ---
-  y_max_h1 &lt;- dfunc(m1, m1, curr_se)
-  curve(dfunc(x, m1, curr_se), from = x_range[1], to = x_range[2], 
-        ylab = "Densità", xlab = if(is_std) "Z/t Score" else "Differenza tra Medie", main = TeX(r"($H_1$)"))
-  
-  xb_min &lt;- max(x_range[1], if(is.finite(crit_low)) crit_low else x_range[1])
-  xb_max &lt;- min(x_range[2], if(is.finite(crit_high)) crit_high else x_range[2])
-  if(xb_min &lt; xb_max) polygon(c(xb_min, seq(xb_min, xb_max, length=100), xb_max), c(0, dfunc(seq(xb_min, xb_max, length=100), m1, curr_se), 0), col = "lightblue", border = NA)
-  if(is.finite(crit_low)) polygon(c(x_range[1], seq(x_range[1], crit_low, length=100), crit_low), c(0, dfunc(seq(x_range[1], crit_low, length=100), m1, curr_se), 0), col = "lightgreen", border = NA)
-  if(is.finite(crit_high)) polygon(c(crit_high, seq(crit_high, x_range[2], length=100), x_range[2]), c(0, dfunc(seq(crit_high, x_range[2], length=100), m1, curr_se), 0), col = "lightgreen", border = NA)
-  
-  if (show_ci &amp;&amp; !is.null(curr_obs)) {
-    y_pos_h1 &lt;- y_max_h1 * 0.20
-    z_crit &lt;- if(tails == "two") qfunc(1 - alpha/2, 0, curr_se) else qfunc(1 - alpha, 0, curr_se)
+    s_pooled_sq &lt;- ((n1 - 1) * s1^2 + (n2 - 1) * s2^2) / (n1 + n2 - 2)
+    sp &lt;- sqrt(s_pooled_sq)
+    se &lt;- sp * sqrt(1/n1 + 1/n2)
+    df_val &lt;- n1 + n2 - 2
+    
+    m0 &lt;- 0
+    m1 &lt;- if(is_std) d_eff / se else d_eff 
+    curr_se &lt;- if(is_std) 1 else se
+    curr_obs &lt;- if(!is.null(obs_stat) &amp;&amp; !is.na(obs_stat)) (if(is_std) obs_stat / se else obs_stat) else NULL
+    
+    dfunc &lt;- if(dist_type == "z") dnorm else function(x, m, s) dt((x-m)/s, df_val)/s
+    pfunc &lt;- if(dist_type == "z") pnorm else function(q, m, s) pt((q-m)/s, df_val)
+    qfunc &lt;- if(dist_type == "z") qnorm else function(p, m, s) qt(p, df_val)*s + m
+    
+    # Soglie critiche su H0
+    crit_low &lt;- -Inf; crit_high &lt;- Inf
     if (tails == "two") {
-      ci_l &lt;- curr_obs - z_crit; ci_h &lt;- curr_obs + z_crit
-      lines(c(ci_l, ci_h), c(y_pos_h1, y_pos_h1), col = "darkred", lwd = 3)
+        crit_low  &lt;- qfunc(alpha/2, m0, curr_se)
+        crit_high &lt;- qfunc(1 - alpha/2, m0, curr_se)
     } else if (tails == "right") {
-      ci_l &lt;- curr_obs - z_crit
-      lines(c(ci_l, x_range[2]-curr_se), c(y_pos_h1, y_pos_h1), col = "darkred", lwd = 3)
-      lines(c(x_range[2]-curr_se, x_range[2]), c(y_pos_h1, y_pos_h1), col = "darkred", lwd = 3, lty = 3)
+        crit_high &lt;- qfunc(1 - alpha, m0, curr_se)
     } else {
-      ci_h &lt;- curr_obs + z_crit
-      lines(c(x_range[1]+curr_se, ci_h), c(y_pos_h1, y_pos_h1), col = "darkred", lwd = 3)
-      lines(c(x_range[1], x_range[1]+curr_se), c(y_pos_h1, y_pos_h1), col = "darkred", lwd = 3, lty = 3)
+        crit_low  &lt;- qfunc(alpha, m0, curr_se)
     }
-  }
-
-  abline(v = c(m1, crit_low[is.finite(crit_low)], crit_high[is.finite(crit_high)]), lty = c(1, 3, 3), col = c("black", "blue", "blue"))
-  legend("topright", legend = c("Beta (Err II)", "Power (1-Beta)"), fill = c("lightblue", "lightgreen"), bty = "n")
+    
+    if (is.null(x_range)) {
+        vals &lt;- c(m0, m1, crit_low[is.finite(crit_low)], crit_high[is.finite(crit_high)])
+        if(!is.null(curr_obs)) vals &lt;- c(vals, curr_obs)
+        x_range &lt;- c(min(vals) - 4*curr_se, max(vals) + 4*curr_se)
+    }
+    
+    # Gestione dinamica del layout in base ai flag
+    n_active &lt;- length(show_plots)
+    if(n_active == 0) return(NULL)
+    
+    old_par &lt;- par(mfrow = c(n_active, 1), mar = c(4, 4, 3, 2))
+    on.exit(par(old_par))
+    
+    # --- 1. GRAFICO H0 ---
+    if("H0" %in% show_plots) {
+        y_max_h0 &lt;- dfunc(m0, m0, curr_se)
+        curve(dfunc(x, m0, curr_se), from = x_range[1], to = x_range[2], 
+              ylab = "Densità", main = TeX(r"($H_0$)"), xaxt = "n", xlab = "")
+        
+        if(is.finite(crit_low)) {
+            x_a &lt;- seq(x_range[1], crit_low, length = 100)
+            polygon(c(x_a, crit_low), c(dfunc(x_a, m0, curr_se), 0), density = 20, angle = 45, col = "black")
+        }
+        if(is.finite(crit_high)) {
+            x_a &lt;- seq(crit_high, x_range[2], length = 100)
+            polygon(c(crit_high, x_a), c(0, dfunc(x_a, m0, curr_se)), density = 20, angle = 45, col = "black")
+        }
+        
+        if (!is.null(curr_obs)) {
+            y_obs &lt;- dfunc(curr_obs, m0, curr_se)
+            if (tails == "right" || (tails == "two" &amp;&amp; curr_obs &gt; m0)) {
+                px &lt;- seq(abs(curr_obs), x_range[2], length = 100)
+                polygon(c(abs(curr_obs), px, x_range[2]), c(0, dfunc(px, m0, curr_se), 0), col = rgb(1,0,0,0.3), border = NA)
+            }
+            if (tails == "left" || (tails == "two" &amp;&amp; curr_obs &lt; m0)) {
+                px &lt;- seq(x_range[1], -abs(curr_obs), length = 100)
+                polygon(c(x_range[1], px, -abs(curr_obs)), c(0, dfunc(px, m0, curr_se), 0), col = rgb(1,0,0,0.3), border = NA)
+            }
+            points(curr_obs, 0, col = "red", pch = 19, cex = 1.3)
+            pv_val &lt;- if(tails == "right") 1 - pfunc(curr_obs, m0, curr_se) else 
+                if(tails == "left") pfunc(curr_obs, m0, curr_se) else 2 * (1 - pfunc(abs(curr_obs), m0, curr_se))
+            text(curr_obs, y_obs, labels = paste("p =", round(pv_val, 4)), pos = 3, col = "red", font = 2)
+            
+            if (show_ci) {
+                y_pos_h0 &lt;- y_max_h0 * 0.20
+                z_crit &lt;- if(tails == "two") qfunc(1 - alpha/2, 0, curr_se) else qfunc(1 - alpha, 0, curr_se)
+                if (tails == "two") {
+                    ci_l &lt;- curr_obs - z_crit; ci_h &lt;- curr_obs + z_crit
+                    lines(c(ci_l, ci_h), c(y_pos_h0, y_pos_h0), col = "darkred", lwd = 3)
+                } else if (tails == "right") {
+                    ci_l &lt;- curr_obs - z_crit
+                    lines(c(ci_l, x_range[2]-curr_se), c(y_pos_h0, y_pos_h0), col = "darkred", lwd = 3)
+                    lines(c(x_range[2]-curr_se, x_range[2]), c(y_pos_h0, y_pos_h0), col = "darkred", lwd = 3, lty = 3)
+                } else {
+                    ci_h &lt;- curr_obs + z_crit
+                    lines(c(x_range[1]+curr_se, ci_h), c(y_pos_h0, y_pos_h0), col = "darkred", lwd = 3)
+                    lines(c(x_range[1], x_range[1]+curr_se), c(y_pos_h0, y_pos_h0), col = "darkred", lwd = 3, lty = 3)
+                }
+            }
+        }
+        abline(v = c(m0, crit_low[is.finite(crit_low)], crit_high[is.finite(crit_high)]), lty = c(1, 3, 3), col = c("black", "blue", "blue"))
+        axis(1)
+    }
+    
+    # --- 2. GRAFICO H1 ---
+    if("H1" %in% show_plots) {
+        y_max_h1 &lt;- dfunc(m1, m1, curr_se)
+        curve(dfunc(x, m1, curr_se), from = x_range[1], to = x_range[2], 
+              ylab = "Densità", xlab = if(is_std) "Z/t Score" else "Differenza tra Medie", main = TeX(r"($H_1$)"))
+        
+        xb_min &lt;- max(x_range[1], if(is.finite(crit_low)) crit_low else x_range[1])
+        xb_max &lt;- min(x_range[2], if(is.finite(crit_high)) crit_high else x_range[2])
+        if(xb_min &lt; xb_max) polygon(c(xb_min, seq(xb_min, xb_max, length=100), xb_max), c(0, dfunc(seq(xb_min, xb_max, length=100), m1, curr_se), 0), col = "lightblue", border = NA)
+        if(is.finite(crit_low)) polygon(c(x_range[1], seq(x_range[1], crit_low, length=100), crit_low), c(0, dfunc(seq(x_range[1], crit_low, length=100), m1, curr_se), 0), col = "lightgreen", border = NA)
+        if(is.finite(crit_high)) polygon(c(crit_high, seq(crit_high, x_range[2], length=100), x_range[2]), c(0, dfunc(seq(crit_high, x_range[2], length=100), m1, curr_se), 0), col = "lightgreen", border = NA)
+        
+        if (show_ci &amp;&amp; !is.null(curr_obs)) {
+            y_pos_h1 &lt;- y_max_h1 * 0.20
+            z_crit &lt;- if(tails == "two") qfunc(1 - alpha/2, 0, curr_se) else qfunc(1 - alpha, 0, curr_se)
+            if (tails == "two") {
+                ci_l &lt;- curr_obs - z_crit; ci_h &lt;- curr_obs + z_crit
+                lines(c(ci_l, ci_h), c(y_pos_h1, y_pos_h1), col = "darkred", lwd = 3)
+            } else if (tails == "right") {
+                ci_l &lt;- curr_obs - z_crit
+                lines(c(ci_l, x_range[2]-curr_se), c(y_pos_h1, y_pos_h1), col = "darkred", lwd = 3)
+                lines(c(x_range[2]-curr_se, x_range[2]), c(y_pos_h1, y_pos_h1), col = "darkred", lwd = 3, lty = 3)
+            } else {
+                ci_h &lt;- curr_obs + z_crit
+                lines(c(x_range[1]+curr_se, ci_h), c(y_pos_h1, y_pos_h1), col = "darkred", lwd = 3)
+                lines(c(x_range[1], x_range[1]+curr_se), c(y_pos_h1, y_pos_h1), col = "darkred", lwd = 3, lty = 3)
+            }
+        }
+        abline(v = c(m1, crit_low[is.finite(crit_low)], crit_high[is.finite(crit_high)]), lty = c(1, 3, 3), col = c("black", "blue", "blue"))
+        legend("topright", legend = c("Beta (Err II)", "Power (1-Beta)"), fill = c("lightblue", "lightgreen"), bty = "n")
+    }
 }
 
 # --- UI ---
 ui &lt;- fluidPage(
-  titlePanel("Test per due campioni indipendenti"),
-  sidebarLayout(
-    sidebarPanel(
-      checkboxInput("show_ci", "Visualizza IC nel Grafico", TRUE),
-      checkboxInput("is_std", "Standardizzato (Z/t)", FALSE),
-      hr(),
-      radioButtons("dist", "Distribuzione:", choices = list("Z" = "z", "T" = "t"), selected = "t"),
-      radioButtons("tails", "Direzione Test:", choices = list("Bilaterale (≠)" = "two", "Destro (&gt;)" = "right", "Sinistro (&lt;)" = "left")),
-      numericInput("alpha", "Alpha:", value = 0.05, step = 0.01),
-      hr(),
-      fluidRow(column(6, numericInput("n1", "n1:", 30)), column(6, numericInput("n2", "n2:", 30))),
-      fluidRow(column(6, numericInput("s1", "SD 1:", 10)), column(6, numericInput("s2", "SD 2:", 10))),
-      numericInput("d_eff", "Diff. Attesa (Teorica):", value = 5),
-      numericInput("obs_stat", "Diff. Osservata (Dati):", value = 4.5),
-      hr(),
-      checkboxInput("fix_axes", "Blocca Assi X", FALSE),
-      conditionalPanel("input.fix_axes", 
-                       fluidRow(column(6, numericInput("xmin", "Min:", -30)), column(6, numericInput("xmax", "Max:", 30))))
-    ),
-    mainPanel(
-      plotOutput("hypPlot", height = "580px"),
-      hr(),
-      tableOutput("summaryTable")
+    titlePanel("Test per due campioni indipendenti"),
+    sidebarLayout(
+        sidebarPanel(
+            checkboxGroupInput("show_plots", "Visualizza Grafici:",
+                               choices = list("Ipotesi Nulla (H0)" = "H0", 
+                                              "Ipotesi Alternativa (H1)" = "H1"),
+                               selected = c("H0", "H1")),
+            hr(),
+            checkboxInput("show_ci", "Visualizza IC nel Grafico", TRUE),
+            checkboxInput("is_std", "Standardizzato (Z/t)", FALSE),
+            hr(),
+            radioButtons("dist", "Distribuzione:", choices = list("Z" = "z", "T" = "t"), selected = "t"),
+            radioButtons("tails", "Direzione Test:", choices = list("Bilaterale (≠)" = "two", "Destro (&gt;)" = "right", "Sinistro (&lt;)" = "left")),
+            numericInput("alpha", "Alpha:", value = 0.05, step = 0.01),
+            hr(),
+            fluidRow(column(6, numericInput("n1", "n1:", 30)), column(6, numericInput("n2", "n2:", 30))),
+            fluidRow(column(6, numericInput("s1", "SD 1:", 10)), column(6, numericInput("s2", "SD 2:", 10))),
+            numericInput("d_eff", "Diff. Attesa (Teorica):", value = 5),
+            numericInput("obs_stat", "Diff. Osservata (Dati):", value = 4.5),
+            hr(),
+            checkboxInput("fix_axes", "Blocca Assi X", FALSE),
+            conditionalPanel("input.fix_axes", 
+                             fluidRow(column(6, numericInput("xmin", "Min:", -30)), column(6, numericInput("xmax", "Max:", 30))))
+        ),
+        mainPanel(
+            plotOutput("hypPlot", height = "580px"),
+            hr(),
+            tableOutput("summaryTable")
+        )
     )
-  )
 )
 
 # --- Server ---
 server &lt;- function(input, output) {
-  calc_data &lt;- reactive({
-    s_pooled_sq &lt;- ((input$n1 - 1) * input$s1^2 + (input$n2 - 1) * input$s2^2) / (input$n1 + input$n2 - 2)
-    sp &lt;- sqrt(s_pooled_sq)
-    df_val &lt;- input$n1 + input$n2 - 2
-    se &lt;- sp * sqrt(1/input$n1 + 1/input$n2)
+    calc_data &lt;- reactive({
+        s_pooled_sq &lt;- ((input$n1 - 1) * input$s1^2 + (input$n2 - 1) * input$s2^2) / (input$n1 + input$n2 - 2)
+        sp &lt;- sqrt(s_pooled_sq)
+        df_val &lt;- input$n1 + input$n2 - 2
+        se &lt;- sp * sqrt(1/input$n1 + 1/input$n2)
+        
+        qfunc &lt;- if(input$dist == "z") qnorm else function(p) qt(p, df_val)
+        pfunc &lt;- if(input$dist == "z") pnorm else function(q) pt(q, df_val)
+        
+        if(input$tails == "two") {
+            c_low &lt;- qfunc(input$alpha/2) * se
+            c_high &lt;- qfunc(1 - input$alpha/2) * se
+            beta &lt;- pfunc(c_high/se - input$d_eff/se) - pfunc(c_low/se - input$d_eff/se)
+        } else if(input$tails == "right") {
+            c_high &lt;- qfunc(1 - input$alpha) * se
+            beta &lt;- pfunc(c_high/se - input$d_eff/se)
+        } else {
+            c_low &lt;- qfunc(input$alpha) * se
+            beta &lt;- 1 - pfunc(c_low/se - input$d_eff/se)
+        }
+        
+        pv &lt;- NA
+        ci_txt &lt;- "-"
+        if(!is.na(input$obs_stat)) {
+            t_stat &lt;- input$obs_stat / se
+            pv &lt;- if(input$tails == "right") 1 - pfunc(t_stat) else 
+                if(input$tails == "left") pfunc(t_stat) else 2 * (1 - pfunc(abs(t_stat)))
+            
+            z_crit_ci &lt;- if(input$tails == "two") qfunc(1 - input$alpha/2) else qfunc(1 - input$alpha)
+            if(input$tails == "two") {
+                ci_txt &lt;- paste0("[", round(input$obs_stat - z_crit_ci*se, 3), " ; ", round(input$obs_stat + z_crit_ci*se, 3), "]")
+            } else if(input$tails == "right") {
+                ci_txt &lt;- paste0("[", round(input$obs_stat - z_crit_ci*se, 3), " ; +∞)")
+            } else {
+                ci_txt &lt;- paste0("(-∞ ; ", round(input$obs_stat + z_crit_ci*se, 3), "]")
+            }
+        }
+        
+        list(sp=sp, se=se, df=df_val, beta=beta, pwr=1-beta, pv=pv, ci_txt=ci_txt,
+             d_theo=input$d_eff/sp, d_obs=input$obs_stat/sp)
+    })
     
-    qfunc &lt;- if(input$dist == "z") qnorm else function(p) qt(p, df_val)
-    pfunc &lt;- if(input$dist == "z") pnorm else function(q) pt(q, df_val)
+    output$hypPlot &lt;- renderPlot({
+        req(input$show_plots)
+        plot_hypothesis_comparison(input$d_eff, input$n1, input$n2, input$s1, input$s2,
+                                   input$alpha, input$tails, input$dist, input$obs_stat,
+                                   if(input$fix_axes) c(input$xmin, input$xmax) else NULL,
+                                   is_std = input$is_std, show_ci = input$show_ci,
+                                   show_plots = input$show_plots)
+    })
     
-    if(input$tails == "two") {
-      c_low &lt;- qfunc(input$alpha/2) * se
-      c_high &lt;- qfunc(1 - input$alpha/2) * se
-      beta &lt;- pfunc(c_high/se - input$d_eff/se) - pfunc(c_low/se - input$d_eff/se)
-    } else if(input$tails == "right") {
-      c_high &lt;- qfunc(1 - input$alpha) * se
-      beta &lt;- pfunc(c_high/se - input$d_eff/se)
-    } else {
-      c_low &lt;- qfunc(input$alpha) * se
-      beta &lt;- 1 - pfunc(c_low/se - input$d_eff/se)
-    }
-    
-    # Calcolo IC e P-Value se obs_stat esiste
-    pv &lt;- NA
-    ci_txt &lt;- "-"
-    if(!is.na(input$obs_stat)) {
-      t_stat &lt;- input$obs_stat / se
-      pv &lt;- if(input$tails == "right") 1 - pfunc(t_stat) else 
-        if(input$tails == "left") pfunc(t_stat) else 2 * (1 - pfunc(abs(t_stat)))
-      
-      z_crit_ci &lt;- if(input$tails == "two") qfunc(1 - input$alpha/2) else qfunc(1 - input$alpha)
-      if(input$tails == "two") {
-        ci_txt &lt;- paste0("[", round(input$obs_stat - z_crit_ci*se, 3), " ; ", round(input$obs_stat + z_crit_ci*se, 3), "]")
-      } else if(input$tails == "right") {
-        ci_txt &lt;- paste0("[", round(input$obs_stat - z_crit_ci*se, 3), " ; +∞)")
-      } else {
-        ci_txt &lt;- paste0("(-∞ ; ", round(input$obs_stat + z_crit_ci*se, 3), "]")
-      }
-    }
-    
-    list(sp=sp, se=se, df=df_val, beta=beta, pwr=1-beta, pv=pv, ci_txt=ci_txt,
-         d_theo=input$d_eff/sp, d_obs=input$obs_stat/sp)
-  })
-  
-  output$hypPlot &lt;- renderPlot({
-    plot_hypothesis_comparison(input$d_eff, input$n1, input$n2, input$s1, input$s2,
-                               input$alpha, input$tails, input$dist, input$obs_stat,
-                               if(input$fix_axes) c(input$xmin, input$xmax) else NULL,
-                               is_std = input$is_std, show_ci = input$show_ci)
-  })
-  
-  output$summaryTable &lt;- renderTable({
-    res &lt;- calc_data()
-    df_res &lt;- data.frame(
-      Descrizione = c("Errore Standard (SE)", "Power (1-Beta)", "Errore II tipo (Beta)", 
-                      "Cohen's d [vero]", "Cohen's d [osservato]"),
-      Valore = c(round(res$se, 4), round(res$pwr, 4), round(res$beta, 4),
-                 round(res$d_theo, 4), if(!is.na(res$d_obs)) round(res$d_obs, 4) else "-")
-    )
-    
-    if(!is.na(input$obs_stat)) {
-      df_res &lt;- rbind(df_res, 
-                      data.frame(Descrizione = paste0("IC ", (1-input$alpha)*100, "%"), Valore = res$ci_txt),
-                      data.frame(Descrizione = "P-Value", Valore = as.character(round(res$pv, 5))))
-    }
-    df_res
-  }, striped = TRUE, bordered = TRUE)
+    output$summaryTable &lt;- renderTable({
+        res &lt;- calc_data()
+        df_res &lt;- data.frame(
+            Descrizione = c("Errore Standard (SE)", "Power (1-Beta)", "Errore II tipo (Beta)", 
+                            "Cohen's d [vero]", "Cohen's d [osservato]"),
+            Valore = c(round(res$se, 4), round(res$pwr, 4), round(res$beta, 4),
+                       round(res$d_theo, 4), if(!is.na(res$d_obs)) round(res$d_obs, 4) else "-")
+        )
+        
+        if(!is.na(input$obs_stat)) {
+            df_res &lt;- rbind(df_res, 
+                            data.frame(Descrizione = paste0("IC ", (1-input$alpha)*100, "%"), Valore = res$ci_txt),
+                            data.frame(Descrizione = "P-Value", Valore = as.character(round(res$pv, 5))))
+        }
+        df_res
+    }, striped = TRUE, bordered = TRUE)
 }
 
 shinyApp(ui, server)</code></pre>
