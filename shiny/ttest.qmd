@@ -22,11 +22,10 @@ plot_hypothesis_comparison <- function(d_eff, n1, n2, s1, s2, alpha = 0.05,
                                        is_std = FALSE, show_ci = FALSE,
                                        show_plots = c("H0", "H1")) {
     
-    # Logica Cohen's d: se is_std è TRUE, forziamo medie e SD
     if(is_std) {
         curr_s1 <- 1
         curr_s2 <- 1
-        curr_d_eff <- d_eff # Qui d_eff è interpretato come Cohen's d
+        curr_d_eff <- d_eff
     } else {
         curr_s1 <- s1
         curr_s2 <- s2
@@ -47,7 +46,6 @@ plot_hypothesis_comparison <- function(d_eff, n1, n2, s1, s2, alpha = 0.05,
     pfunc <- if(dist_type == "z") pnorm else function(q, m, s) pt((q-m)/s, df_val)
     qfunc <- if(dist_type == "z") qnorm else function(p, m, s) qt(p, df_val)*s + m
     
-    # Soglie critiche su H0
     crit_low <- -Inf; crit_high <- Inf
     if (tails == "two") {
         crit_low  <- qfunc(alpha/2, m0, curr_se)
@@ -87,14 +85,24 @@ plot_hypothesis_comparison <- function(d_eff, n1, n2, s1, s2, alpha = 0.05,
         
         if (!is.null(curr_obs)) {
             y_obs <- dfunc(curr_obs, m0, curr_se)
-            if (tails == "right" || (tails == "two" && curr_obs > m0)) {
-                px <- seq(abs(curr_obs), x_range[2], length = 100)
-                polygon(c(abs(curr_obs), px, x_range[2]), c(0, dfunc(px, m0, curr_se), 0), col = rgb(1,0,0,0.3), border = NA)
+            
+            # --- NUOVA LOGICA DI COLORAZIONE P-VALUE ---
+            if (tails == "right") {
+                px <- seq(curr_obs, x_range[2], length = 200)
+                polygon(c(curr_obs, px, x_range[2]), c(0, dfunc(px, m0, curr_se), 0), col = rgb(1,0,0,0.3), border = NA)
             }
-            if (tails == "left" || (tails == "two" && curr_obs < m0)) {
-                px <- seq(x_range[1], -abs(curr_obs), length = 100)
-                polygon(c(x_range[1], px, -abs(curr_obs)), c(0, dfunc(px, m0, curr_se), 0), col = rgb(1,0,0,0.3), border = NA)
+            if (tails == "left") {
+                px <- seq(x_range[1], curr_obs, length = 200)
+                polygon(c(x_range[1], px, curr_obs), c(0, dfunc(px, m0, curr_se), 0), col = rgb(1,0,0,0.3), border = NA)
             }
+            if (tails == "two") {
+                abs_obs <- abs(curr_obs)
+                px_r <- seq(abs_obs, x_range[2], length = 200)
+                polygon(c(abs_obs, px_r, x_range[2]), c(0, dfunc(px_r, m0, curr_se), 0), col = rgb(1,0,0,0.3), border = NA)
+                px_l <- seq(x_range[1], -abs_obs, length = 200)
+                polygon(c(x_range[1], px_l, -abs_obs), c(0, dfunc(px_l, m0, curr_se), 0), col = rgb(1,0,0,0.3), border = NA)
+            }
+            
             points(curr_obs, 0, col = "red", pch = 19, cex = 1.3)
             pv_val <- if(tails == "right") 1 - pfunc(curr_obs, m0, curr_se) else 
                 if(tails == "left") pfunc(curr_obs, m0, curr_se) else 2 * (1 - pfunc(abs(curr_obs), m0, curr_se))
@@ -172,13 +180,10 @@ ui <- fluidPage(
             numericInput("alpha", "Alpha:", value = 0.05, step = 0.01),
             hr(),
             fluidRow(column(6, numericInput("n1", "n1:", 30)), column(6, numericInput("n2", "n2:", 30))),
-            
-            # Pannello condizionale per SD: scompare se Cohen's d è attivo
             conditionalPanel(
                 condition = "input.is_std == false",
                 fluidRow(column(6, numericInput("s1", "SD 1:", 10)), column(6, numericInput("s2", "SD 2:", 10)))
             ),
-            
             numericInput("d_eff", "Differenza Attesa / d:", value = 5),
             numericInput("obs_stat", "Differenza Osservata / d_obs:", value = 4.5),
             hr(),
@@ -197,7 +202,6 @@ ui <- fluidPage(
 # --- Server ---
 server <- function(input, output) {
     calc_data <- reactive({
-        # Gestione SD per il calcolo SE
         curr_s1 <- if(input$is_std) 1 else input$s1
         curr_s2 <- if(input$is_std) 1 else input$s2
         
