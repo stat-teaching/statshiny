@@ -139,15 +139,26 @@ plot_hypothesis_comparison &lt;- function(d_eff, n1, n2, s1, s2, alpha = 0.05,
                                        is_std = FALSE, show_ci = FALSE,
                                        show_plots = c("H0", "H1")) {
     
-    s_pooled_sq &lt;- ((n1 - 1) * s1^2 + (n2 - 1) * s2^2) / (n1 + n2 - 2)
+    # Logica Cohen's d: se is_std è TRUE, forziamo medie e SD
+    if(is_std) {
+        curr_s1 &lt;- 1
+        curr_s2 &lt;- 1
+        curr_d_eff &lt;- d_eff # Qui d_eff è interpretato come Cohen's d
+    } else {
+        curr_s1 &lt;- s1
+        curr_s2 &lt;- s2
+        curr_d_eff &lt;- d_eff
+    }
+    
+    s_pooled_sq &lt;- ((n1 - 1) * curr_s1^2 + (n2 - 1) * curr_s2^2) / (n1 + n2 - 2)
     sp &lt;- sqrt(s_pooled_sq)
     se &lt;- sp * sqrt(1/n1 + 1/n2)
     df_val &lt;- n1 + n2 - 2
     
     m0 &lt;- 0
-    m1 &lt;- if(is_std) d_eff / se else d_eff 
-    curr_se &lt;- if(is_std) 1 else se
-    curr_obs &lt;- if(!is.null(obs_stat) &amp;&amp; !is.na(obs_stat)) (if(is_std) obs_stat / se else obs_stat) else NULL
+    m1 &lt;- curr_d_eff 
+    curr_se &lt;- se
+    curr_obs &lt;- if(!is.null(obs_stat) &amp;&amp; !is.na(obs_stat)) obs_stat else NULL
     
     dfunc &lt;- if(dist_type == "z") dnorm else function(x, m, s) dt((x-m)/s, df_val)/s
     pfunc &lt;- if(dist_type == "z") pnorm else function(q, m, s) pt((q-m)/s, df_val)
@@ -170,7 +181,6 @@ plot_hypothesis_comparison &lt;- function(d_eff, n1, n2, s1, s2, alpha = 0.05,
         x_range &lt;- c(min(vals) - 4*curr_se, max(vals) + 4*curr_se)
     }
     
-    # Gestione dinamica del layout in base ai flag
     n_active &lt;- length(show_plots)
     if(n_active == 0) return(NULL)
     
@@ -232,7 +242,7 @@ plot_hypothesis_comparison &lt;- function(d_eff, n1, n2, s1, s2, alpha = 0.05,
     if("H1" %in% show_plots) {
         y_max_h1 &lt;- dfunc(m1, m1, curr_se)
         curve(dfunc(x, m1, curr_se), from = x_range[1], to = x_range[2], 
-              ylab = "Densità", xlab = if(is_std) "Z/t Score" else "Differenza tra Medie", main = TeX(r"($H_1$)"))
+              ylab = "Densità", xlab = if(is_std) "Cohen's d" else "Differenza tra Medie", main = TeX(r"($H_1$)"))
         
         xb_min &lt;- max(x_range[1], if(is.finite(crit_low)) crit_low else x_range[1])
         xb_max &lt;- min(x_range[2], if(is.finite(crit_high)) crit_high else x_range[2])
@@ -271,17 +281,23 @@ ui &lt;- fluidPage(
                                               "Ipotesi Alternativa (H1)" = "H1"),
                                selected = c("H0", "H1")),
             hr(),
+            checkboxInput("is_std", "Modalità Cohen's d (Mean=0, SD=1)", FALSE),
             checkboxInput("show_ci", "Visualizza IC nel Grafico", TRUE),
-            checkboxInput("is_std", "Standardizzato (Z/t)", FALSE),
             hr(),
             radioButtons("dist", "Distribuzione:", choices = list("Z" = "z", "T" = "t"), selected = "t"),
             radioButtons("tails", "Direzione Test:", choices = list("Bilaterale (≠)" = "two", "Destro (&gt;)" = "right", "Sinistro (&lt;)" = "left")),
             numericInput("alpha", "Alpha:", value = 0.05, step = 0.01),
             hr(),
             fluidRow(column(6, numericInput("n1", "n1:", 30)), column(6, numericInput("n2", "n2:", 30))),
-            fluidRow(column(6, numericInput("s1", "SD 1:", 10)), column(6, numericInput("s2", "SD 2:", 10))),
-            numericInput("d_eff", "Diff. Attesa (Teorica):", value = 5),
-            numericInput("obs_stat", "Diff. Osservata (Dati):", value = 4.5),
+            
+            # Pannello condizionale per SD: scompare se Cohen's d è attivo
+            conditionalPanel(
+                condition = "input.is_std == false",
+                fluidRow(column(6, numericInput("s1", "SD 1:", 10)), column(6, numericInput("s2", "SD 2:", 10)))
+            ),
+            
+            numericInput("d_eff", "Differenza Attesa / d:", value = 5),
+            numericInput("obs_stat", "Differenza Osservata / d_obs:", value = 4.5),
             hr(),
             checkboxInput("fix_axes", "Blocca Assi X", FALSE),
             conditionalPanel("input.fix_axes", 
@@ -298,7 +314,11 @@ ui &lt;- fluidPage(
 # --- Server ---
 server &lt;- function(input, output) {
     calc_data &lt;- reactive({
-        s_pooled_sq &lt;- ((input$n1 - 1) * input$s1^2 + (input$n2 - 1) * input$s2^2) / (input$n1 + input$n2 - 2)
+        # Gestione SD per il calcolo SE
+        curr_s1 &lt;- if(input$is_std) 1 else input$s1
+        curr_s2 &lt;- if(input$is_std) 1 else input$s2
+        
+        s_pooled_sq &lt;- ((input$n1 - 1) * curr_s1^2 + (input$n2 - 1) * curr_s2^2) / (input$n1 + input$n2 - 2)
         sp &lt;- sqrt(s_pooled_sq)
         df_val &lt;- input$n1 + input$n2 - 2
         se &lt;- sp * sqrt(1/input$n1 + 1/input$n2)
